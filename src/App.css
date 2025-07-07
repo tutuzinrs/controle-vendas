@@ -1,38 +1,171 @@
-.App {
+/* Container principal */
+.container {
+  max-width: 600px;
+  margin: 40px auto;
+  padding: 24px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f7f9fc;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+}
+
+/* Título principal */
+.title {
+  font-size: 28px;
+  font-weight: 700;
+  color: #2c3e50;
+  margin-bottom: 24px;
   text-align: center;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+/* Grid dos cards dos produtos */
+.products-grid {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-bottom: 24px;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
+/* Card produto */
+.product-card {
+  flex: 1 1 120px;
+  min-width: 120px;
+  max-width: 150px;
+  background-color: white;
+  border-radius: 10px;
+  padding: 16px;
+  box-shadow: 0 0 8px rgba(0,0,0,0.1);
+  cursor: pointer;
+  transition: box-shadow 0.3s ease;
   display: flex;
   flex-direction: column;
   align-items: center;
+  user-select: none;
+}
+
+.product-card:hover {
+  box-shadow: 0 0 14px #3498db;
+}
+
+.product-card.selected {
+  border: 3px solid #3498db;
+  box-shadow: 0 0 18px #2980b9;
+}
+
+.product-name {
+  font-weight: 600;
+  font-size: 18px;
+  margin-bottom: 8px;
+  color: #34495e;
+  text-align: center;
+}
+
+.product-price {
+  font-size: 16px;
+  font-weight: 700;
+  color: #27ae60;
+}
+
+/* Quantidade input */
+.quantity-input-container {
+  margin: 24px 0;
+  display: flex;
   justify-content: center;
-  font-size: calc(10px + 2vmin);
+  gap: 12px;
+  align-items: center;
+}
+
+.quantity-input-container input[type="number"] {
+  width: 100px;
+  padding: 8px 12px;
+  font-size: 16px;
+  border-radius: 8px;
+  border: 1.5px solid #ced4da;
+  outline: none;
+  transition: border-color 0.3s ease;
+}
+
+.quantity-input-container input[type="number"]:focus {
+  border-color: #3498db;
+  box-shadow: 0 0 6px #3498db;
+}
+
+.quantity-input-container button {
+  padding: 12px 20px;
+  background-color: #3498db;
+  border: none;
+  border-radius: 10px;
   color: white;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s ease;
 }
 
-.App-link {
-  color: #61dafb;
+.quantity-input-container button:hover {
+  background-color: #2980b9;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+/* Histórico dos pedidos */
+.history-title {
+  font-size: 22px;
+  font-weight: 600;
+  color: #34495e;
+  margin-bottom: 12px;
+  border-bottom: 2px solid #3498db;
+  padding-bottom: 8px;
+  text-align: center;
+}
+
+.history-list {
+  list-style-type: none;
+  padding: 0;
+  max-height: 300px;
+  overflow-y: auto;
+  border-radius: 10px;
+  box-shadow: inset 0 0 10px rgba(0,0,0,0.05);
+  background-color: white;
+  margin-bottom: 24px;
+}
+
+.history-item {
+  padding: 14px;
+  border-bottom: 1px solid #ecf0f1;
+  display: flex;
+  justify-content: space-between;
+  font-size: 16px;
+  color: #2c3e50;
+  font-weight: 500;
+}
+
+.history-item:last-child {
+  border-bottom: none;
+}
+
+.history-item > span:first-child {
+  flex: 2;
+}
+
+.history-item > span:nth-child(2) {
+  flex: 1;
+  text-align: center;
+  color: #7f8c8d;
+}
+
+.history-item > span:last-child {
+  flex: 1;
+  text-align: right;
+  color: #27ae60;
+  font-weight: 700;
+}
+
+/* Total acumulado */
+.total-container {
+  font-size: 20px;
+  font-weight: 700;
+  text-align: right;
+  color: #2c3e50;
+  padding-top: 10px;
+  border-top: 2px solid #3498db;
 }
