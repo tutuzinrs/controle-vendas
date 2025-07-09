@@ -131,7 +131,10 @@ export default function Historico() {
             {pedidosSelecionados.map((pedido, index) => (
               <PedidoItem key={index}>
                 <span>
-                  {pedido.produto} × {pedido.quantidade}
+                  {pedido.produto} × {pedido.quantidade}{" "}
+                  <span style={{ color: "#888", fontSize: "0.9rem" }}>
+                    ({pedido.formaPagamento || "?"})
+                  </span>
                 </span>
                 <span>R$ {pedido.total.toFixed(2)}</span>
               </PedidoItem>

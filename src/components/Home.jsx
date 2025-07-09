@@ -212,6 +212,8 @@ export default function Home() {
   const [pedidos, setPedidos] = useState([]);
   const [produtos, setProdutos] = useState([]);
   const [confirmStep, setConfirmStep] = useState(0);
+  const [formaPagamento, setFormaPagamento] = useState("");
+  const [valorPago, setValorPago] = useState("");
 
   const carregarProdutos = async () => {
     const snapshot = await getDocs(collection(db, "valoresProdutos"));
@@ -235,6 +237,13 @@ export default function Home() {
     carregarProdutos();
     buscarPedidos();
   }, []);
+
+  const subtotal = pedidos.reduce((acc, pedido) => acc + Number(pedido.total || 0), 0);
+
+  const troco =
+    formaPagamento === "dinheiro" && valorPago && Number(valorPago) >= subtotal
+      ? (Number(valorPago) - subtotal).toFixed(2)
+      : null;
 
   const adicionarPedido = async () => {
     if (!produtoSelecionado) {
@@ -264,40 +273,48 @@ export default function Home() {
   };
 
   const finalizarDia = async () => {
-    if (confirmStep === 0) {
-      setConfirmStep(1);
+  if (confirmStep === 0) {
+    setConfirmStep(1);
+    return;
+  }
+
+  if (confirmStep === 1) {
+    const hojeStr = new Date().toISOString().slice(0, 10);
+    const pedidosDoDia = pedidos.filter((p) => p.data.startsWith(hojeStr));
+
+    if (pedidosDoDia.length === 0) {
+      alert("Nenhum pedido registrado para hoje.");
+      setConfirmStep(0);
       return;
     }
-    if (confirmStep === 1) {
-      const hojeStr = new Date().toISOString().slice(0, 10);
-      const pedidosDoDia = pedidos.filter((p) => p.data.startsWith(hojeStr));
 
-      if (pedidosDoDia.length === 0) {
-        alert("Nenhum pedido registrado para hoje.");
-        setConfirmStep(0);
-        return;
+    try {
+      const pedidosComPagamento = pedidosDoDia.map((pedido) => ({
+        ...pedido,
+        formaPagamento: formaPagamento || "não informado",
+      }));
+
+      await addDoc(collection(db, "diasFinalizados"), {
+        data: hojeStr,
+        pedidos: pedidosComPagamento,
+        timestamp: new Date(),
+      });
+
+      for (const pedido of pedidosDoDia) {
+        await deleteDoc(doc(db, "pedidos", pedido.id));
       }
 
-      try {
-        await addDoc(collection(db, "diasFinalizados"), {
-          data: hojeStr,
-          pedidos: pedidosDoDia,
-          timestamp: new Date(),
-        });
-
-        for (const pedido of pedidosDoDia) {
-          await deleteDoc(doc(db, "pedidos", pedido.id));
-        }
-
-        alert("Dia finalizado com sucesso!");
-        setConfirmStep(0);
-        buscarPedidos();
-      } catch (error) {
-        alert("Erro ao finalizar o dia: " + error.message);
-        setConfirmStep(0);
-      }
+      alert("Pedido finalizado com sucesso!");
+      setConfirmStep(0);
+      setFormaPagamento("");
+      setValorPago("");
+      buscarPedidos();
+    } catch (error) {
+      alert("Erro ao finalizar o dia: " + error.message);
+      setConfirmStep(0);
     }
-  };
+  }
+};
   return (
     <Container>
       <Title>Controle de Vendas - Cura Ressaca</Title>
@@ -364,23 +381,82 @@ export default function Home() {
           ))}
         </HistoryList>
       )}
+
       {pedidos.length > 0 && (
         <SubtotalContainer>
-          Subtotal:{" "}
-          <strong>
-            R${" "}
-            {pedidos
-              .reduce((acc, pedido) => acc + Number(pedido.total || 0), 0)
-              .toFixed(2)}
-          </strong>
+          Subtotal: <strong>R$ {subtotal.toFixed(2)}</strong>
         </SubtotalContainer>
       )}
 
+      {/* Opções de pagamento */}
+      <div style={{ textAlign: "center", marginTop: "30px" }}>
+        <div style={{ marginBottom: "15px" }}>
+          <strong>Forma de Pagamento:</strong>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              gap: "10px",
+              marginTop: "10px",
+            }}
+          >
+            {["cartao", "pix", "dinheiro"].map((opcao) => (
+              <button
+                key={opcao}
+                onClick={() => setFormaPagamento(opcao)}
+                style={{
+                  padding: "10px 15px",
+                  borderRadius: "8px",
+                  border: "none",
+                  cursor: "pointer",
+                  backgroundColor: formaPagamento === opcao ? "#C41E3A" : "#eee",
+                  color: formaPagamento === opcao ? "#fff" : "#333",
+                  fontWeight: "600",
+                }}
+              >
+                {opcao.toUpperCase()}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {formaPagamento === "dinheiro" && (
+          <div style={{ marginBottom: "10px" }}>
+            <input
+              type="number"
+              placeholder="Valor pago"
+              value={valorPago}
+              onChange={(e) => setValorPago(e.target.value)}
+              style={{
+                padding: "10px",
+                fontSize: "1rem",
+                borderRadius: "8px",
+                border: "1.5px solid #ccc",
+                textAlign: "center",
+                width: "150px",
+              }}
+            />
+            {troco !== null && (
+              <div
+                style={{
+                  marginTop: "10px",
+                  color: "#2c3e50",
+                  fontWeight: "bold",
+                }}
+              >
+                Troco: R$ {troco}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
       <FinalizeButton confirm={confirmStep === 1} onClick={finalizarDia}>
         {confirmStep === 0
-          ? "Finalizar Dia"
+          ? "Finalizar Pedido"
           : "Clique novamente para confirmar"}
       </FinalizeButton>
     </Container>
   );
 }
+
