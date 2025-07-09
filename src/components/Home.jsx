@@ -32,7 +32,7 @@ const ProductsGrid = styled.div`
 `;
 
 const ProductPrice = styled.div`
-  color: #C41E3A ;
+  color: #c41e3a;
   font-weight: bold;
   transition: color 0.3s ease;
 `;
@@ -49,7 +49,7 @@ const ProductCard = styled.div`
   user-select: none;
 
   &:hover {
-    background: #C41E3A ;
+    background: #c41e3a;
     color: white;
 
     ${ProductPrice} {
@@ -90,12 +90,12 @@ const QuantityInput = styled.input`
 
   &:focus {
     outline: none;
-    border-color: #C41E3A ;
+    border-color: #c41e3a;
   }
 `;
 
 const AddButton = styled.button`
-  background-color: #C41E3A ;
+  background-color: #c41e3a;
   border: none;
   border-radius: 8px;
   color: white;
@@ -149,7 +149,7 @@ const ItemQuantity = styled.span`
 
 const ItemTotal = styled.div`
   font-weight: 700;
-  color: #C41E3A ;
+  color: #c41e3a;
   margin-right: 12px;
 `;
 
@@ -180,6 +180,30 @@ const FinalizeButton = styled.button`
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
   user-select: none;
   transition: background-color 0.3s ease;
+`;
+
+const SubtotalContainer = styled.div`
+  text-align: center;
+  margin-top: 20px;
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #2c3e50;
+`;
+
+const QuantityButton = styled.button`
+  background-color: #c41e3a;
+  border: none;
+  color: white;
+  font-size: 1.2rem;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+
+  &:hover {
+    background-color: #d4883a;
+  }
 `;
 
 export default function Home() {
@@ -274,7 +298,6 @@ export default function Home() {
       }
     }
   };
-
   return (
     <Container>
       <Title>Controle de Vendas - Cura Ressaca</Title>
@@ -294,6 +317,12 @@ export default function Home() {
       </ProductsGrid>
 
       <QuantityContainer>
+        <QuantityButton
+          onClick={() => setQuantidade((prev) => Math.max(1, prev - 1))}
+        >
+          −
+        </QuantityButton>
+
         <QuantityInput
           type="number"
           min="1"
@@ -301,6 +330,11 @@ export default function Home() {
           onChange={(e) => setQuantidade(Number(e.target.value))}
           placeholder="Quantidade"
         />
+
+        <QuantityButton onClick={() => setQuantidade((prev) => prev + 1)}>
+          +
+        </QuantityButton>
+
         <AddButton onClick={adicionarPedido}>Adicionar Pedido</AddButton>
       </QuantityContainer>
 
@@ -319,7 +353,10 @@ export default function Home() {
               </ItemInfo>
               <div style={{ display: "flex", alignItems: "center" }}>
                 <ItemTotal>R$ {pedido.total.toFixed(2)}</ItemTotal>
-                <TrashButton onClick={() => removerPedido(pedido.id)} title="Remover pedido">
+                <TrashButton
+                  onClick={() => removerPedido(pedido.id)}
+                  title="Remover pedido"
+                >
                   <FaTrash />
                 </TrashButton>
               </div>
@@ -327,9 +364,22 @@ export default function Home() {
           ))}
         </HistoryList>
       )}
+      {pedidos.length > 0 && (
+        <SubtotalContainer>
+          Subtotal:{" "}
+          <strong>
+            R${" "}
+            {pedidos
+              .reduce((acc, pedido) => acc + Number(pedido.total || 0), 0)
+              .toFixed(2)}
+          </strong>
+        </SubtotalContainer>
+      )}
 
       <FinalizeButton confirm={confirmStep === 1} onClick={finalizarDia}>
-        {confirmStep === 0 ? "Finalizar Dia" : "Clique novamente para confirmar"}
+        {confirmStep === 0
+          ? "Finalizar Dia"
+          : "Clique novamente para confirmar"}
       </FinalizeButton>
     </Container>
   );

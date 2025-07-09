@@ -51,9 +51,18 @@ const PedidoItem = styled.li`
   justify-content: space-between;
 `;
 
+const Subtotal = styled.div`
+  text-align: center;
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #c41e3a;
+  margin-top: 20px;
+`;
+
 export default function Historico() {
   const [diasFinalizados, setDiasFinalizados] = useState([]);
   const [pedidosSelecionados, setPedidosSelecionados] = useState(null);
+  const [totalGeral, setTotalGeral] = useState(0);
 
   const buscarDias = async () => {
     const snapshot = await getDocs(collection(db, "diasFinalizados"));
@@ -62,6 +71,14 @@ export default function Historico() {
       ...doc.data(),
     }));
     setDiasFinalizados(lista);
+
+    let total = 0;
+    lista.forEach((dia) => {
+      dia.pedidos.forEach((pedido) => {
+        total += Number(pedido.total || 0);
+      });
+    });
+    setTotalGeral(total);
   };
 
   useEffect(() => {
@@ -120,8 +137,25 @@ export default function Historico() {
               </PedidoItem>
             ))}
           </PedidoList>
+          <Subtotal>
+            Total do dia: R${" "}
+            {pedidosSelecionados
+              .reduce((acc, p) => acc + Number(p.total || 0), 0)
+              .toFixed(2)}
+          </Subtotal>
         </>
       )}
+
+      <p
+        style={{
+          textAlign: "center",
+          fontWeight: "bold",
+          color: "#1d060a",
+          marginBottom: 15,
+        }}
+      >
+        Total geral: R$ {totalGeral.toFixed(2)}
+      </p>
     </Container>
   );
 }
